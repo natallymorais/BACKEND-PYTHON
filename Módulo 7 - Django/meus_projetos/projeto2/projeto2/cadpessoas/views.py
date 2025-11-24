@@ -5,5 +5,6 @@ from .serializers import PessoasSerializer # serializer para o modelo Pessoas
 
 # - fornece endpoints padrão (list, retrieve, create, update, destroy) pelo ModelViewSet,
 class PessoasViewSet(viewsets.ModelViewSet):
-    queryset = Pessoas.objects.all().order_by('id') # queryset base, ordenado por id
+    queryset = Pessoas.objects.all().order_by('-id') # queryset base, ordenado por id
     serializer_class = PessoasSerializer # serializer usado para (de)serializar Pessoas
+    http_method_names = ['get'] # métodos HTTP permitidos
