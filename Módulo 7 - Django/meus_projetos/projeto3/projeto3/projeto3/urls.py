@@ -14,15 +14,21 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin # painel administrativo do Django
-from django.urls import path, include # path para rotas, include para incluir outras URLs
-from rest_framework.routers import DefaultRouter # router que gera rotas para ViewSets
-from livros.views import AutorViewSet, LivroViewSet # ViewSets registrados no router
+from django.contrib import admin
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from livros.views import AutorViewSet, LivroViewSet
+from rest_framework.authtoken.views import obtain_auth_token
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView # Adicionado para o drf-spectacular
 
 router = DefaultRouter()
-router.register(r'autores', AutorViewSet) # registra endpoints para autores: /api/autores/
-router.register(r'livros', LivroViewSet) # registra endpoints para livros: /api/livros/
-
+router.register(r'autores', AutorViewSet)
+router.register(r'livros', LivroViewSet)
 urlpatterns = [
- path('admin/', admin.site.urls), # rota do Django admin
- path('api/', include(router.urls)),] # inclui as rotas do router sob /api/
+    path('admin/', admin.site.urls),
+    path('api/', include(router.urls)),
+    path('api-token-auth/', obtain_auth_token),
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'), # Adicionado para o drf-spectacular
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'), # Adicionado para o drfspectacular
+    path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'), # Adicionado para o drf-spectacular
+]

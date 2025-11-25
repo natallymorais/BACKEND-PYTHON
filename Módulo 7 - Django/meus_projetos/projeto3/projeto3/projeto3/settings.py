@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
-
+import inspect
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'livros',
+    'rest_framework.authtoken',
+    'django_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -124,12 +126,45 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-REST_FRAMEWORK = {
- 'DEFAULT_PERMISSION_CLASSES': [
- 'rest_framework.permissions.AllowAny',
- ],
- 'DEFAULT_FILTER_BACKENDS': [
- 'django_filters.rest_framework.DjangoFilterBackend',
- ],
+REST_FRAMEWORK = { # configurações do Django REST Framework
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+    'rest_framework.authentication.TokenAuthentication',
+    'rest_framework.authentication.SessionAuthentication', # para login via web
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+    'rest_framework.permissions.IsAuthenticatedOrReadOnly', # GET liberado, outros métodos exigem login
+    ],
+    'DEFAULT_FILTER_BACKENDS': [
+    'django_filters.rest_framework.DjangoFilterBackend', # filtro via query params
+    ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema', # Adicionado para o drf-spectacular
  
+}
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'API de Livros',
+    'DESCRIPTION': inspect.cleandoc("""
+    ## Bem-vindo à API de Livros!
+    - **Listar livros** (`GET /api/livros/`) sem autenticação
+    - **Criar livros** (`POST /api/livros/`) com autenticação
+    - **Atualizar livros** (`PUT/PATCH /api/livros/{id}/`) com autenticação
+    - **Excluir livros** (`DELETE /api/livros/{id}/`) com autenticação
+    ### Autenticação
+    Use o endpoint `/api/token/` para obter seu token e inclua no cabeçalho:
+    ```
+    Authorization: Token <sua_chave>
+    ```
+    """),
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SECURITY': [{'TokenAuth': []}],
+    'COMPONENTS': {
+    'securitySchemes': {
+    'TokenAuth': {
+    'type': 'apiKey',
+    'in': 'header',
+    'name': 'Authorization',
+    'description': 'Use o formato: Token <sua_chave>',
+    },
+    },
+    },
 }
